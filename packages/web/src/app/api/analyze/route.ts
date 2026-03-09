@@ -22,16 +22,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get credentials from environment
-    const githubToken = process.env.GITHUB_TOKEN
+    // Get GitHub token from Authorization header
+    const authHeader = request.headers.get('Authorization')
+    const githubToken = authHeader?.replace('Bearer ', '')
+
+    // Fallback to environment variable if no auth header
+    const token = githubToken || process.env.GITHUB_TOKEN
+
+    // Get Anthropic credentials from environment
     const anthropicKey = process.env.ANTHROPIC_API_KEY
     const anthropicBaseUrl = process.env.ANTHROPIC_BASE_URL
     const model = process.env.MODEL || 'claude-opus-4.6'
 
-    if (!githubToken) {
+    if (!token) {
       return NextResponse.json(
-        { error: 'GitHub token not configured' },
-        { status: 500 }
+        { error: 'GitHub authentication required. Please login first.' },
+        { status: 401 }
       )
     }
 
@@ -44,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     // Configure analyzer
     const analysisConfig: AnalysisConfig = {
-      githubToken,
+      githubToken: token,
       anthropicApiKey: anthropicKey,
       anthropicBaseUrl,
       model,
