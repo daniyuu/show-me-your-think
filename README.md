@@ -13,133 +13,75 @@ Given any GitHub repository, `show-me-your-think` will:
 3. **Map relationships** - Discovers dependencies, conflicts, and connections between features
 4. **Generate insights** - Creates a comprehensive report with architectural impact analysis
 
+## 📦 Available Interfaces
+
+- **🌐 Web Dashboard** - Beautiful web interface with real-time analysis
+- **⌨️ CLI Tool** - Command-line interface with OAuth Device Flow
+
 ## 🚀 Quick Start
 
-### Prerequisites
-
-- Node.js >= 18
-- pnpm >= 8
-- GitHub OAuth App ([setup guide](OAUTH_SETUP.md))
-- Anthropic API Key ([get one here](https://console.anthropic.com/)) or use local proxy
-
-### Installation
+### Option 1: Web Dashboard (Recommended)
 
 ```bash
-# Clone the repository
-git clone https://github.com/daniyuu/show-me-your-think.git
-cd show-me-your-think
-
 # Install dependencies
 pnpm install
 
-# Build the project
+# Configure environment (see packages/web/.env.example)
+cp packages/web/.env.example packages/web/.env.local
+# Edit .env.local and set GITHUB_TOKEN
+
+# Start web server
+pnpm --filter @smyt/web dev
+
+# Open http://localhost:3000 in your browser
+```
+
+### Option 2: CLI Tool
+
+### Option 2: CLI Tool
+
+```bash
+# Install dependencies
+pnpm install
 pnpm build
 
-# Configure OAuth Client ID (one-time setup)
+# Configure OAuth Client ID
 cp .env.example .env
 # Edit .env and set GITHUB_OAUTH_CLIENT_ID (see OAUTH_SETUP.md)
-```
 
-### Usage
-
-**First Run - OAuth Device Flow**
-
-```bash
-# First time: OAuth Device Flow authentication
+# Run analysis
 pnpm dev analyze googleworkspace/cli
-
-# 🔐 GitHub Authentication
-# Opening GitHub in your browser for authentication...
-#
-# Enter this code in your browser:
-#     WXYZ-1234
-#
-# ✓ Browser opened automatically
-# ⠋ Waiting for you to approve in browser...
-
-# Subsequent runs: uses saved token
-pnpm dev analyze owner/repo
-# ✓ Using saved GitHub credentials
 ```
 
-See [DEVICE_FLOW.md](DEVICE_FLOW.md) for detailed authentication guide.
+**CLI Features:**
+- OAuth Device Flow authentication (no manual token copy-paste)
+- Saves token for subsequent runs
+- Command-line options for customization
 
-**Command Options**
+See [DEVICE_FLOW.md](DEVICE_FLOW.md) for detailed CLI authentication guide.
 
+## 📊 Example Usage
+
+### Web Dashboard
+1. Enter repository: `facebook/react`
+2. Set active days: `30`
+3. Click "开始分析"
+4. View beautiful results
+5. Download Markdown report
+
+### CLI
 ```bash
-# Analyze any GitHub repository
+# Basic analysis
 pnpm dev analyze owner/repo
-pnpm dev analyze facebook/react
 
-# Specify output file
+# Custom options
 pnpm dev analyze owner/repo --output ./my-report.md
 
 # Adjust active days threshold (default: 30)
 pnpm dev analyze owner/repo --days 14
 
-# Use custom API endpoint (e.g., local proxy)
-pnpm dev analyze owner/repo --anthropic-base-url http://localhost:4141
-
-# Specify model
+# Custom model
 pnpm dev analyze owner/repo --model claude-opus-4.6
-```
-
-### Custom API Endpoints
-
-You can route requests through a local proxy or custom endpoint:
-
-```bash
-# Via environment variable
-export ANTHROPIC_BASE_URL=http://localhost:4141
-pnpm dev analyze owner/repo
-
-# Via command line
-pnpm dev analyze owner/repo --anthropic-base-url http://localhost:4141
-```
-
-**Use cases:**
-- Local development and testing
-- Cost optimization with caching
-- Corporate proxy requirements
-- Custom model endpoints
-
-See [CUSTOM_ENDPOINT.md](CUSTOM_ENDPOINT.md) for detailed setup instructions.
-
-## 📊 Example Output
-
-The tool generates a detailed Markdown report with:
-
-### Summary
-- Total active branches
-- Main development themes
-- Potential conflicts
-
-### Per-Feature Analysis
-- **What**: Clear description of what's being built
-- **Why**: The reasoning and motivation
-- **Architectural Impact**: How it affects the codebase
-- **Relationships**: Dependencies and conflicts with other features
-- **Confidence Score**: AI's confidence in the analysis
-
-### Example
-
-```markdown
-### 1. `feature/auth-refactor` 🟢
-
-**What**
-Migrating authentication system from JWT to OAuth2.0 with support for enterprise SSO providers.
-
-**Why**
-Responding to enterprise customer requirements for SSO integration. Current JWT implementation
-lacks the flexibility needed for multi-tenant scenarios.
-
-**Architectural Impact**
-Major refactor of auth middleware layer. Touches user session management, API gateway, and
-3 downstream microservices. Requires database migration for user identity mapping.
-
-**Related Features**
-- ⚠️ conflicts-with: `fix/session-memory-leak` - Both modify session store
-- 🏗️ builds-on: `infra/redis-cluster` - Requires new session backend
 ```
 
 ## 🏗️ Architecture
@@ -152,18 +94,22 @@ show-me-your-think/
 │   │   ├── analyzer.ts      # AI-powered intent extraction
 │   │   ├── repo-analyzer.ts # Main orchestrator
 │   │   └── markdown-generator.ts
-│   └── cli/                  # Command-line interface
-└── (future: web dashboard)
+│   ├── cli/                  # Command-line interface
+│   │   └── github-auth.ts   # OAuth Device Flow
+│   └── web/                  # Web dashboard (Next.js)
+│       ├── app/             # Next.js App Router
+│       ├── components/      # React components
+│       └── api/             # API routes
 ```
 
 ## 🔮 Roadmap
 
-- [x] **MVP**: CLI tool with Markdown reports
-- [ ] **V2**: Interactive terminal UI (TUI)
-- [ ] **V3**: Web dashboard for team collaboration
-  - Real-time updates
+- [x] **V1**: CLI tool with Markdown reports
+- [x] **V2**: Web dashboard with beautiful UI
+- [ ] **V3**: Real-time collaboration features
   - Multi-repo monitoring
   - Team notifications
+  - Webhook integrations
 
 ## 🤝 Contributing
 
