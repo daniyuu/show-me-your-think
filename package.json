@@ -9,7 +9,12 @@
   "scripts": {
     "dev": "pnpm --filter @smyt/cli dev",
     "build": "pnpm -r build",
-    "clean": "pnpm -r clean"
+    "clean": "pnpm -r clean",
+    "prepare": "husky",
+    "lint": "eslint packages/**/*.{ts,tsx} --max-warnings 0",
+    "lint:fix": "eslint packages/**/*.{ts,tsx} --fix",
+    "format": "prettier --write \"packages/**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"packages/**/*.{ts,tsx,json,md}\""
   },
   "keywords": [
     "github",
@@ -24,7 +29,25 @@
     "pnpm": ">=8.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.2",
+    "prettier": "^3.8.1",
     "typescript": "^5.3.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "packageManager": "pnpm@9.5.0+sha512.140036830124618d624a2187b50d04289d5a087f326c9edfc0ccd733d76c4f52c3a313d4fc148794a2a9d81553016004e6742e8cf850670268a7387fc220c903"
 }

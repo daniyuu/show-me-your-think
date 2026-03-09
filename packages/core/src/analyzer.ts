@@ -1,5 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
-import type { CommitInfo, PullRequest, FeatureIntent } from "./types.js";
+import Anthropic from '@anthropic-ai/sdk';
+import type { CommitInfo, PullRequest, FeatureIntent } from './types.js';
 
 export class AIAnalyzer {
   private client: Anthropic;
@@ -15,7 +15,7 @@ export class AIAnalyzer {
     }
 
     this.client = new Anthropic(clientConfig);
-    this.model = options?.model || "claude-opus-4.6";
+    this.model = options?.model || 'claude-opus-4.6';
   }
 
   /**
@@ -36,15 +36,15 @@ export class AIAnalyzer {
       max_tokens: 2000,
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
     });
 
     const content = response.content[0];
-    if (content.type !== "text") {
-      throw new Error("Unexpected response type from Claude");
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type from Claude');
     }
 
     return this.parseIntentResponse(content.text);
@@ -59,17 +59,13 @@ export class AIAnalyzer {
       branchName: string;
       intent: FeatureIntent;
       filesChanged: string[];
-    }>,
+    }>
   ): Promise<
     Map<
       string,
       Array<{
         featureId: string;
-        relationship:
-          | "depends-on"
-          | "conflicts-with"
-          | "builds-on"
-          | "related-to";
+        relationship: 'depends-on' | 'conflicts-with' | 'builds-on' | 'related-to';
         description: string;
       }>
     >
@@ -85,15 +81,15 @@ export class AIAnalyzer {
       max_tokens: 3000,
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
     });
 
     const content = response.content[0];
-    if (content.type !== "text") {
-      throw new Error("Unexpected response type from Claude");
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type from Claude');
     }
 
     return this.parseRelationshipResponse(content.text, features);
@@ -103,15 +99,15 @@ export class AIAnalyzer {
     branchName: string,
     commits: CommitInfo[],
     pr: PullRequest | undefined,
-    codeDiff: string,
+    codeDiff: string
   ): string {
-    const commitMessages = commits.map((c) => `- ${c.message}`).join("\n");
+    const commitMessages = commits.map((c) => `- ${c.message}`).join('\n');
     const filesChanged = [...new Set(commits.flatMap((c) => c.filesChanged))];
 
     // Truncate diff if too long (keep first 10000 chars)
     const truncatedDiff =
       codeDiff.length > 10000
-        ? codeDiff.substring(0, 10000) + "\n\n[... diff truncated ...]"
+        ? codeDiff.substring(0, 10000) + '\n\n[... diff truncated ...]'
         : codeDiff;
 
     return `You are analyzing a feature branch in a software project. Your goal is to understand:
@@ -121,14 +117,14 @@ export class AIAnalyzer {
 
 Branch: ${branchName}
 
-${pr ? `Pull Request: ${pr.title}\nDescription: ${pr.description}\n` : ""}
+${pr ? `Pull Request: ${pr.title}\nDescription: ${pr.description}\n` : ''}
 
 Commits:
 ${commitMessages}
 
 Files changed (${filesChanged.length}):
-${filesChanged.slice(0, 20).join("\n")}
-${filesChanged.length > 20 ? `\n... and ${filesChanged.length - 20} more` : ""}
+${filesChanged.slice(0, 20).join('\n')}
+${filesChanged.length > 20 ? `\n... and ${filesChanged.length - 20} more` : ''}
 
 Code changes:
 \`\`\`diff
@@ -158,16 +154,16 @@ Return ONLY the JSON, no other text.`;
       branchName: string;
       intent: FeatureIntent;
       filesChanged: string[];
-    }>,
+    }>
   ): string {
     const featureDescriptions = features
       .map((f, i) => {
         return `[${i}] ${f.branchName}
 What: ${f.intent.what}
 Why: ${f.intent.why}
-Files: ${f.filesChanged.slice(0, 10).join(", ")}${f.filesChanged.length > 10 ? "..." : ""}`;
+Files: ${f.filesChanged.slice(0, 10).join(', ')}${f.filesChanged.length > 10 ? '...' : ''}`;
       })
-      .join("\n\n");
+      .join('\n\n');
 
     return `You are analyzing relationships between multiple features being developed in parallel.
 
@@ -199,10 +195,8 @@ Return ONLY the JSON array, no other text.`;
     try {
       // Remove markdown code block markers if present
       let cleanResponse = response.trim();
-      if (cleanResponse.startsWith("```")) {
-        cleanResponse = cleanResponse
-          .replace(/^```(?:json)?\n?/, "")
-          .replace(/\n?```$/, "");
+      if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
       }
 
       // Try to extract JSON from response (in case there's extra text)
@@ -212,18 +206,17 @@ Return ONLY the JSON array, no other text.`;
       const parsed = JSON.parse(json);
 
       return {
-        what: parsed.what || "Unable to determine",
-        why: parsed.why || "Unable to determine",
-        architecturalImpact: parsed.architecturalImpact || "Unknown impact",
-        confidence:
-          typeof parsed.confidence === "number" ? parsed.confidence : 0.5,
+        what: parsed.what || 'Unable to determine',
+        why: parsed.why || 'Unable to determine',
+        architecturalImpact: parsed.architecturalImpact || 'Unknown impact',
+        confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
       };
     } catch (error) {
-      console.error("Failed to parse AI response:", error);
+      console.error('Failed to parse AI response:', error);
       return {
-        what: "Unable to analyze (parse error)",
-        why: "Unable to analyze (parse error)",
-        architecturalImpact: "Unknown",
+        what: 'Unable to analyze (parse error)',
+        why: 'Unable to analyze (parse error)',
+        architecturalImpact: 'Unknown',
         confidence: 0.1,
       };
     }
@@ -231,26 +224,20 @@ Return ONLY the JSON array, no other text.`;
 
   private parseRelationshipResponse(
     response: string,
-    features: Array<{ id: string }>,
+    features: Array<{ id: string }>
   ): Map<
     string,
     Array<{
       featureId: string;
-      relationship:
-        | "depends-on"
-        | "conflicts-with"
-        | "builds-on"
-        | "related-to";
+      relationship: 'depends-on' | 'conflicts-with' | 'builds-on' | 'related-to';
       description: string;
     }>
   > {
     try {
       // Remove markdown code block markers if present
       let cleanResponse = response.trim();
-      if (cleanResponse.startsWith("```")) {
-        cleanResponse = cleanResponse
-          .replace(/^```(?:json)?\n?/, "")
-          .replace(/\n?```$/, "");
+      if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
       }
 
       const jsonMatch = cleanResponse.match(/\[[\s\S]*\]/);
@@ -278,7 +265,7 @@ Return ONLY the JSON array, no other text.`;
 
       return map;
     } catch (error) {
-      console.error("Failed to parse relationship response:", error);
+      console.error('Failed to parse relationship response:', error);
       return new Map();
     }
   }
