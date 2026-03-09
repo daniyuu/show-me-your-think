@@ -1,0 +1,30 @@
+{
+  "name": "show-me-your-think",
+  "version": "0.1.0",
+  "description": "Analyze GitHub repositories to understand what people are building and why",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter @smyt/cli dev",
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean"
+  },
+  "keywords": [
+    "github",
+    "analysis",
+    "ai",
+    "developer-tools"
+  ],
+  "author": "daniyuu",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "packageManager": "pnpm@9.5.0+sha512.140036830124618d624a2187b50d04289d5a087f326c9edfc0ccd733d76c4f52c3a313d4fc148794a2a9d81553016004e6742e8cf850670268a7387fc220c903"
+}
