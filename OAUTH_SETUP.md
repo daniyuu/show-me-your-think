@@ -23,33 +23,21 @@ Click **"Register application"**
 After creating, you'll see:
 - **Client ID**: `Ov23li...` (copy this)
 
-### 3. Update the Code
+### 3. Configure Environment Variable
 
-Edit `packages/cli/src/github-auth.ts`:
+Edit `.env` file in project root:
 
-```typescript
-// Line 11: Replace with your Client ID
-const CLIENT_ID = 'Ov23liYourActualClientIdHere';
+```env
+GITHUB_OAUTH_CLIENT_ID=Ov23liYourClientId
+ANTHROPIC_API_KEY=dummy-key
+ANTHROPIC_BASE_URL=http://localhost:4141
+MODEL=claude-opus-4.6
 ```
 
 ### 4. Rebuild
 
 ```bash
 pnpm build
-```
-
-## Alternative: Use Environment Variable
-
-Instead of hardcoding, use an environment variable:
-
-**In `github-auth.ts`:**
-```typescript
-const CLIENT_ID = process.env.GITHUB_OAUTH_CLIENT_ID || 'fallback-client-id';
-```
-
-**In `.env`:**
-```env
-GITHUB_OAUTH_CLIENT_ID=Ov23liYourClientId
 ```
 
 ## Security Note
@@ -94,7 +82,7 @@ Enter this code in your browser:
 Make sure you:
 1. Created the OAuth App correctly
 2. Copied the Client ID (starts with `Ov23li`)
-3. Updated the code or `.env` file
+3. Updated the `.env` file
 4. Ran `pnpm build`
 
 ### Browser doesn't open

@@ -133,10 +133,8 @@ CLI 自动检测授权完成
 你需要设置 `GITHUB_OAUTH_CLIENT_ID`：
 
 1. 按照上面"步骤 1"创建 OAuth App
-2. 设置环境变量或修改代码
+2. 设置环境变量
 3. 运行 `pnpm build`
-
-或者跳过 OAuth，使用手动 token 模式（系统会自动回退）。
 
 ### 浏览器未自动打开
 
@@ -164,25 +162,6 @@ pnpm dev analyze owner/repo
 
 会重新进行认证。
 
-## 🆚 对比：传统方式 vs Device Flow
-
-### 传统方式（手动 Token）
-```
-1. 访问 GitHub settings
-2. 创建 Personal Access Token
-3. 复制 token
-4. 粘贴到 .env 文件
-5. 运行命令
-```
-
-### Device Flow（OAuth）
-```
-1. 配置 OAuth Client ID（仅一次）
-2. 运行命令
-3. 浏览器弹出 → 点击授权
-4. 完成！
-```
-
 ## 💡 Pro Tips
 
 ### 多账户切换
@@ -194,23 +173,6 @@ pnpm dev analyze owner/repo
 # 重新授权
 ```
 
-### CI/CD 环境
-
-在 CI/CD 中使用传统 token（Device Flow 需要交互）：
-
-```yaml
-env:
-  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-```
-
-### 临时使用（不保存）
-
-Device Flow 会自动保存 token。如需一次性使用，用传统方式：
-
-```bash
-pnpm dev analyze owner/repo --github-token ghp_xxx
-```
-
 ## 🔒 安全说明
 
 - **Client ID 是公开的**：可以安全地提交到 Git
@@ -220,8 +182,7 @@ pnpm dev analyze owner/repo --github-token ghp_xxx
 
 ## 📚 相关文档
 
-- [OAUTH_SETUP.md](OAUTH_SETUP.md) - 详细 OAuth 设置指南
-- [INTERACTIVE_LOGIN.md](INTERACTIVE_LOGIN.md) - 手动 token 模式文档
+- [OAUTH_SETUP.md](OAUTH_SETUP.md) - OAuth 设置指南
 - [README.md](README.md) - 项目总览
 
 ---

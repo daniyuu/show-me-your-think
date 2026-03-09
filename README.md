@@ -19,7 +19,7 @@ Given any GitHub repository, `show-me-your-think` will:
 
 - Node.js >= 18
 - pnpm >= 8
-- **No manual token setup required!** The CLI will guide you through GitHub authentication
+- GitHub OAuth App ([setup guide](OAUTH_SETUP.md))
 - Anthropic API Key ([get one here](https://console.anthropic.com/)) or use local proxy
 
 ### Installation
@@ -34,46 +34,41 @@ pnpm install
 
 # Build the project
 pnpm build
+
+# Configure OAuth Client ID (one-time setup)
+cp .env.example .env
+# Edit .env and set GITHUB_OAUTH_CLIENT_ID (see OAUTH_SETUP.md)
 ```
 
 ### Usage
 
-**Interactive Mode (Recommended)**
-
-Just run the command - you'll be guided through GitHub authentication:
+**First Run - OAuth Device Flow**
 
 ```bash
-# First time: will prompt for GitHub login
+# First time: OAuth Device Flow authentication
 pnpm dev analyze googleworkspace/cli
 
-# 🔑 GitHub Authentication Required
-# ? How would you like to authenticate?
-#   🌐 Open GitHub settings to create token
-#   📋 Paste existing token
+# 🔐 GitHub Authentication
+# Opening GitHub in your browser for authentication...
+#
+# Enter this code in your browser:
+#     WXYZ-1234
+#
+# ✓ Browser opened automatically
+# ⠋ Waiting for you to approve in browser...
 
 # Subsequent runs: uses saved token
 pnpm dev analyze owner/repo
-# ? Use saved GitHub token? (Y/n)
+# ✓ Using saved GitHub credentials
 ```
 
-**Traditional Mode (Environment Variables)**
+See [DEVICE_FLOW.md](DEVICE_FLOW.md) for detailed authentication guide.
 
-```bash
-# Configure environment variables
-cp .env.example .env
-# Edit .env and add your tokens
-
-# Analyze any GitHub repository
-pnpm dev analyze owner/repo
-```
-
-See [INTERACTIVE_LOGIN.md](INTERACTIVE_LOGIN.md) for detailed authentication guide.
+**Command Options**
 
 ```bash
 # Analyze any GitHub repository
 pnpm dev analyze owner/repo
-
-# Example: Analyze React
 pnpm dev analyze facebook/react
 
 # Specify output file

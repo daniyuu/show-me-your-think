@@ -1,46 +1,50 @@
 # 🎉 完成！项目已就绪
 
-## ✨ 新功能：交互式 GitHub 登录
+## ✨ OAuth Device Flow 认证
 
-不再需要手动配置 GitHub token！CLI 会自动引导你完成登录过程。
+无需手动复制粘贴 token！通过浏览器授权即可。
 
 ## 🚀 现在就试试
 
-### 方式 1: 交互式登录（推荐）
+### 一键运行
 
 ```bash
-# 直接运行，会自动提示登录
+# 直接运行，会自动引导 OAuth 认证
 pnpm dev analyze googleworkspace/cli
 ```
 
 你会看到：
 
 ```
-🔑 GitHub Authentication Required
+🔐 GitHub Authentication
 
-You need a GitHub Personal Access Token to analyze repositories.
-Scopes needed: repo (private) or public_repo (public only)
+Opening GitHub in your browser for authentication...
 
-? How would you like to authenticate?
-❯ 🌐 Open GitHub settings to create token
-  📋 Paste existing token
+┌─────────────────────────────────────┐
+│  GitHub Authentication Required     │
+└─────────────────────────────────────┘
+
+Enter this code in your browser:
+
+    WXYZ-1234
+
+✓ Browser opened automatically
+
+⠋ Waiting for you to approve in browser...
 ```
 
-**选择第一个选项**，浏览器会自动打开 GitHub，创建 token 后粘贴回来即可！
+在浏览器中授权后，自动继续！
 
-### 方式 2: 使用环境变量（传统方式）
+### 环境配置
 
-如果你已经有 `.env` 文件配置好了：
+确保 `.env` 文件已配置：
 
 ```bash
 # .env 文件内容
-GITHUB_TOKEN=ghp_your_token
+GITHUB_OAUTH_CLIENT_ID=Ov23liYourClientId
 ANTHROPIC_API_KEY=dummy-key
 ANTHROPIC_BASE_URL=http://localhost:4141
 MODEL=claude-opus-4.6
-
-# 直接运行
-pnpm dev analyze googleworkspace/cli
 ```
 
 ## 📋 完整功能清单
@@ -53,7 +57,7 @@ pnpm dev analyze googleworkspace/cli
 - [x] 自定义 API 端点支持（localhost:4141）
 
 ### ✅ 用户体验
-- [x] **交互式 GitHub 登录**（新功能！）
+- [x] **OAuth Device Flow 认证**（浏览器授权）
 - [x] Token 自动保存和重用
 - [x] `logout` 命令清除 token
 - [x] 友好的错误提示
@@ -74,8 +78,9 @@ pnpm dev analyze googleworkspace/cli
 2. **[GETTING_STARTED.md](GETTING_STARTED.md)** - 快速上手
 3. **[ARCHITECTURE.md](ARCHITECTURE.md)** - 架构设计
 4. **[CUSTOM_ENDPOINT.md](CUSTOM_ENDPOINT.md)** - 自定义端点配置
-5. **[INTERACTIVE_LOGIN.md](INTERACTIVE_LOGIN.md)** - 交互式登录指南（新！）
-6. **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - 快速参考
+5. **[DEVICE_FLOW.md](DEVICE_FLOW.md)** - OAuth Device Flow 认证指南
+6. **[OAUTH_SETUP.md](OAUTH_SETUP.md)** - OAuth 应用设置
+7. **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - 快速参考
 
 ## 🎯 测试示例
 
@@ -97,18 +102,12 @@ pnpm dev analyze googleworkspace/cli --days 7
 pnpm dev analyze googleworkspace/cli --output workspace-analysis.md
 ```
 
-### 例子 4: 使用特定 token（跳过登录）
-
-```bash
-pnpm dev analyze googleworkspace/cli --github-token ghp_xxx
-```
-
 ## 🔒 安全性
 
-- Token 保存在 `~/.smyt/github-token`
+- OAuth Token 保存在 `~/.smyt/github-token`
 - 文件权限设置为 `600`（仅所有者可读写）
-- 密码输入时使用 `*` 掩码
-- 可随时用 `pnpm dev logout` 清除
+- Client ID 是公开的，可安全提交到 Git
+- 可随时用 `pnpm dev logout` 清除 token
 
 ## 🛠️ 可用命令
 
@@ -130,13 +129,15 @@ pnpm dev logout
    ↓
    运行: pnpm dev analyze owner/repo
    ↓
-   提示: GitHub 认证
+   OAuth Device Flow 启动
    ↓
-   选择: "打开 GitHub 创建 token"
+   浏览器打开 GitHub 授权页面
    ↓
-   浏览器打开 → 创建 token → 复制
+   输入显示的授权码（如 WXYZ-1234）
    ↓
-   粘贴 token → 选择保存
+   点击 "Authorize"
+   ↓
+   Token 自动保存
    ↓
    开始分析...
 
@@ -144,9 +145,9 @@ pnpm dev logout
    ↓
    运行: pnpm dev analyze owner/repo
    ↓
-   提示: "使用保存的 token？"
+   使用已保存的 token
    ↓
-   按 Enter → 直接开始分析
+   直接开始分析
 ```
 
 ## 🎨 输出示例
