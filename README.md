@@ -38,8 +38,6 @@ pnpm --filter @smyt/web dev
 
 ### Option 2: CLI Tool
 
-### Option 2: CLI Tool
-
 ```bash
 # Install dependencies
 pnpm install
