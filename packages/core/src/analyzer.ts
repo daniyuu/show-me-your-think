@@ -201,25 +201,44 @@ Return ONLY the JSON array, no other text.`;
 
       // Try to extract JSON from response (in case there's extra text)
       const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
-      const json = jsonMatch ? jsonMatch[0] : cleanResponse;
+      if (!jsonMatch) {
+        console.warn('   ⚠️  AI response did not contain JSON, using fallback');
+        return this.fallbackIntent();
+      }
 
-      const parsed = JSON.parse(json);
+      const parsed = JSON.parse(jsonMatch[0]);
+
+      // Validate and warn about missing fields
+      const missing: string[] = [];
+      if (!parsed.what) missing.push('what');
+      if (!parsed.why) missing.push('why');
+      if (!parsed.architecturalImpact) missing.push('architecturalImpact');
+      if (missing.length > 0) {
+        console.warn(`   ⚠️  AI response missing fields: ${missing.join(', ')}`);
+      }
 
       return {
         what: parsed.what || 'Unable to determine',
         why: parsed.why || 'Unable to determine',
         architecturalImpact: parsed.architecturalImpact || 'Unknown impact',
-        confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
+        confidence: Math.max(
+          0,
+          Math.min(1, typeof parsed.confidence === 'number' ? parsed.confidence : 0.5)
+        ),
       };
-    } catch (error) {
-      console.error('Failed to parse AI response:', error);
-      return {
-        what: 'Unable to analyze (parse error)',
-        why: 'Unable to analyze (parse error)',
-        architecturalImpact: 'Unknown',
-        confidence: 0.1,
-      };
+    } catch {
+      console.warn('   ⚠️  Failed to parse AI response, using fallback');
+      return this.fallbackIntent();
     }
+  }
+
+  private fallbackIntent(): FeatureIntent {
+    return {
+      what: 'Unable to analyze (parse error)',
+      why: 'Unable to analyze (parse error)',
+      architecturalImpact: 'Unknown',
+      confidence: 0.1,
+    };
   }
 
   private parseRelationshipResponse(
@@ -252,20 +271,24 @@ Return ONLY the JSON array, no other text.`;
 
         if (!fromId || !toId) continue;
 
+        // Validate relationship type
+        const validTypes = ['depends-on', 'conflicts-with', 'builds-on', 'related-to'];
+        const relType = validTypes.includes(rel.relationship) ? rel.relationship : 'related-to';
+
         if (!map.has(fromId)) {
           map.set(fromId, []);
         }
 
         map.get(fromId)!.push({
           featureId: toId,
-          relationship: rel.relationship,
-          description: rel.description,
+          relationship: relType,
+          description: rel.description || 'No description provided',
         });
       }
 
       return map;
-    } catch (error) {
-      console.error('Failed to parse relationship response:', error);
+    } catch {
+      console.warn('   ⚠️  Failed to parse relationship response, skipping relationships');
       return new Map();
     }
   }
