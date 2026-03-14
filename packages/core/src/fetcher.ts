@@ -1,6 +1,23 @@
 import { Octokit } from '@octokit/rest';
 import type { Branch, CommitInfo, PullRequest } from './types.js';
 
+/** Simple concurrency limiter — runs at most `limit` promises at a time */
+async function pLimit<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
+  const results: T[] = new Array(tasks.length);
+  let index = 0;
+
+  async function worker() {
+    while (index < tasks.length) {
+      const i = index++;
+      results[i] = await tasks[i]();
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(limit, tasks.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
+}
+
 export class GitHubFetcher {
   private octokit: Octokit;
 
@@ -25,8 +42,9 @@ export class GitHubFetcher {
     const now = new Date();
     const threshold = activeDaysThreshold * 24 * 60 * 60 * 1000;
 
-    const branchDetails = await Promise.all(
-      branches.map(async (branch) => {
+    // Fetch commit details with concurrency limit to avoid API rate limits
+    const tasks = branches.map((branch) => async () => {
+      try {
         const { data: commit } = await this.octokit.repos.getCommit({
           owner,
           repo,
@@ -43,8 +61,19 @@ export class GitHubFetcher {
           author: commit.commit.author?.name || 'Unknown',
           isActive,
         };
-      })
-    );
+      } catch {
+        // If we can't fetch commit details, mark as inactive
+        return {
+          name: branch.name,
+          lastCommitSha: branch.commit.sha,
+          lastCommitDate: now,
+          author: 'Unknown',
+          isActive: false,
+        };
+      }
+    });
+
+    const branchDetails = await pLimit(tasks, 5);
 
     return branchDetails;
   }
