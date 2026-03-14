@@ -7,6 +7,7 @@ export type {
   Feature,
   RepoAnalysis,
   AnalysisConfig,
+  ProgressCallback,
 } from './types.js';
 
 // Main classes
