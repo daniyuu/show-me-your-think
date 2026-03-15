@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { homedir } from 'os';
 import { join } from 'path';
-import { readFile, writeFile, mkdir } from 'fs/promises';
+import { readFile, writeFile, mkdir, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 
 const CONFIG_DIR = join(homedir(), '.smyt');
@@ -130,7 +130,7 @@ export class GitHubAuth {
   static async clearToken(): Promise<void> {
     try {
       if (existsSync(TOKEN_FILE)) {
-        await writeFile(TOKEN_FILE, '', 'utf-8');
+        await unlink(TOKEN_FILE);
         console.log(chalk.green('✅ Token cleared'));
       } else {
         console.log(chalk.dim('No saved token found'));
