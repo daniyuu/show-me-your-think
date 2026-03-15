@@ -57,12 +57,11 @@ program
       const providerName: 'anthropic' | 'openai' =
         options.provider === 'openai' ? 'openai' : 'anthropic';
 
-      // Resolve API key: --api-key > --anthropic-key > env vars based on provider
+      // Resolve API key: each provider uses ONLY its own key sources
       const apiKey =
-        options.apiKey ||
-        options.anthropicKey ||
-        (providerName === 'openai' ? process.env.OPENAI_API_KEY : process.env.ANTHROPIC_API_KEY) ||
-        process.env.ANTHROPIC_API_KEY;
+        providerName === 'openai'
+          ? options.apiKey || process.env.OPENAI_API_KEY
+          : options.apiKey || options.anthropicKey || process.env.ANTHROPIC_API_KEY;
 
       const baseUrl = options.baseUrl || options.anthropicBaseUrl || process.env.ANTHROPIC_BASE_URL;
       const model = options.model || undefined;
