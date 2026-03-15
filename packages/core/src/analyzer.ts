@@ -224,7 +224,14 @@ Return ONLY the JSON array, no other text.`;
       const json = jsonMatch ? jsonMatch[0] : cleanResponse;
 
       const relationships = JSON.parse(json);
-      const map = new Map<string, Array<any>>();
+      const map = new Map<
+        string,
+        Array<{
+          featureId: string;
+          relationship: 'depends-on' | 'conflicts-with' | 'builds-on' | 'related-to';
+          description: string;
+        }>
+      >();
 
       for (const rel of relationships) {
         const fromId = features[rel.from]?.id;
@@ -233,14 +240,18 @@ Return ONLY the JSON array, no other text.`;
         if (!fromId || !toId) continue;
 
         // Validate relationship type
-        const validTypes = ['depends-on', 'conflicts-with', 'builds-on', 'related-to'];
-        const relType = validTypes.includes(rel.relationship) ? rel.relationship : 'related-to';
+        type RelType = 'depends-on' | 'conflicts-with' | 'builds-on' | 'related-to';
+        const validTypes: RelType[] = ['depends-on', 'conflicts-with', 'builds-on', 'related-to'];
+        const relType: RelType = validTypes.includes(rel.relationship)
+          ? (rel.relationship as RelType)
+          : 'related-to';
 
         if (!map.has(fromId)) {
           map.set(fromId, []);
         }
 
-        map.get(fromId)!.push({
+        const entries = map.get(fromId);
+        entries?.push({
           featureId: toId,
           relationship: relType,
           description: rel.description || 'No description provided',

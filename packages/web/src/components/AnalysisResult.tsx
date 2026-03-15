@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown from 'react-markdown';
 
 interface AnalysisResultProps {
   result: {
-    markdown: string
+    markdown: string;
     summary: {
-      totalActiveBranches: number
-      mainThemes: string[]
-      potentialConflicts: number
-    }
-  }
+      totalActiveBranches: number;
+      mainThemes: string[];
+      potentialConflicts: number;
+    };
+  };
 }
 
 export function AnalysisResult({ result }: AnalysisResultProps) {
@@ -77,9 +77,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
               </h3>
             ),
             p: ({ children }) => (
-              <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-                {children}
-              </p>
+              <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">{children}</p>
             ),
             ul: ({ children }) => (
               <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 space-y-1">
@@ -101,13 +99,13 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
       <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={() => {
-            const blob = new Blob([result.markdown], { type: 'text/markdown' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = 'think-report.md'
-            a.click()
-            URL.revokeObjectURL(url)
+            const blob = new Blob([result.markdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'think-report.md';
+            a.click();
+            URL.revokeObjectURL(url);
           }}
           className="px-6 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-200"
         >
@@ -115,5 +113,5 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
         </button>
       </div>
     </div>
-  )
+  );
 }

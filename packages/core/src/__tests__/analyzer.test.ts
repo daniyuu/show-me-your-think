@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from 'vitest';
 
 // We test the private parsing methods by instantiating AIAnalyzer with a
@@ -7,9 +8,11 @@ import { describe, it, expect } from 'vitest';
 
 import { AIAnalyzer } from '../analyzer.js';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function makeAnalyzer(): any {
-  // Constructor needs an API key — we never call the real API in tests
-  return new AIAnalyzer('fake-key');
+  // Constructor needs an LLMProvider — we never call the real API in tests
+  const fakeProvider = { complete: async () => '' };
+  return new AIAnalyzer(fakeProvider);
 }
 
 describe('AIAnalyzer.parseIntentResponse', () => {

@@ -39,9 +39,7 @@ export class MarkdownGenerator {
     }
 
     // Sort by confidence score (highest first)
-    const sortedFeatures = [...features].sort(
-      (a, b) => b.intent.confidence - a.intent.confidence
-    );
+    const sortedFeatures = [...features].sort((a, b) => b.intent.confidence - a.intent.confidence);
 
     const featureBlocks = sortedFeatures.map((feature, index) => {
       return this.generateFeatureBlock(feature, index + 1);
@@ -100,14 +98,12 @@ ${commits.map((c) => `- \`${c.sha.substring(0, 7)}\` ${c.message} (${c.date.toLo
       return `## ⚠️ Potential Conflicts\n\n✅ No conflicts detected between active features.`;
     }
 
-    const conflictList = summary.potentialConflicts
-      .map((conflict) => `- ${conflict}`)
-      .join('\n');
+    const conflictList = summary.potentialConflicts.map((conflict) => `- ${conflict}`).join('\n');
 
     return `## ⚠️ Potential Conflicts\n\n${conflictList}`;
   }
 
-  private generateFooter(analysis: RepoAnalysis): string {
+  private generateFooter(_analysis: RepoAnalysis): string {
     return `## 📌 Notes
 
 - Analysis based on branches active within the last 30 days
