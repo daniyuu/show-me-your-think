@@ -20,13 +20,17 @@ export class RepoAnalyzer {
   async analyze(owner: string, repo: string, onProgress?: ProgressCallback): Promise<RepoAnalysis> {
     console.log(`🔍 Analyzing ${owner}/${repo}...`);
 
-    // 1. Fetch all branches
+    // 1. Detect the repo's default branch
+    const defaultBranch = await this.fetcher.getDefaultBranch(owner, repo);
+    console.log(`🌿 Default branch: ${defaultBranch}`);
+
+    // 2. Fetch all branches
     console.log('📊 Fetching branches...');
     const branches = await this.fetcher.fetchBranches(owner, repo, this.config.activeDaysThreshold);
 
-    // Filter out main/master and apply custom filter
+    // Filter out the default branch and apply custom filter
     const activeBranches = branches.filter((branch) => {
-      if (['main', 'master'].includes(branch.name)) return false;
+      if (branch.name === defaultBranch) return false;
       if (!branch.isActive) return false;
       if (this.config.branchFilter) {
         return this.config.branchFilter(branch);
@@ -36,7 +40,7 @@ export class RepoAnalyzer {
 
     console.log(`✅ Found ${activeBranches.length} active branches`);
 
-    // 2. Analyze each branch
+    // 3. Analyze each branch
     console.log('🤖 Analyzing features with AI...');
     const features: Feature[] = [];
     const total = activeBranches.length;
@@ -48,13 +52,13 @@ export class RepoAnalyzer {
       } else {
         console.log(`   Analyzing (${i + 1}/${total}): ${branch.name}`);
       }
-      const feature = await this.analyzeFeature(owner, repo, branch);
+      const feature = await this.analyzeFeature(owner, repo, branch, defaultBranch);
       if (feature) {
         features.push(feature);
       }
     }
 
-    // 3. Analyze relationships between features
+    // 4. Analyze relationships between features
     console.log('🔗 Analyzing feature relationships...');
     const relationships = await this.analyzer.analyzeRelationships(
       features.map((f) => ({
@@ -70,7 +74,7 @@ export class RepoAnalyzer {
       feature.relatedFeatures = relationships.get(feature.id) || [];
     }
 
-    // 4. Generate high-level insights
+    // 5. Generate high-level insights
     console.log('💡 Generating insights...');
     const summary = this.generateSummary(features);
 
@@ -89,11 +93,12 @@ export class RepoAnalyzer {
   private async analyzeFeature(
     owner: string,
     repo: string,
-    branch: Branch
+    branch: Branch,
+    defaultBranch: string
   ): Promise<Feature | null> {
     try {
       // Fetch commits
-      const commits = await this.fetcher.fetchCommits(owner, repo, branch.name);
+      const commits = await this.fetcher.fetchCommits(owner, repo, branch.name, defaultBranch);
 
       if (commits.length === 0) {
         console.log(`   ⚠️  No commits found for ${branch.name}, skipping`);
@@ -104,7 +109,7 @@ export class RepoAnalyzer {
       const pr = await this.fetcher.fetchPullRequest(owner, repo, branch.name);
 
       // Fetch code diff
-      const codeDiff = await this.fetcher.fetchDiff(owner, repo, branch.name);
+      const codeDiff = await this.fetcher.fetchDiff(owner, repo, branch.name, defaultBranch);
 
       // Analyze with AI
       const intent = await this.analyzer.analyzeFeature({
