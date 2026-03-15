@@ -32,12 +32,15 @@ program
   .option('-o, --output <file>', 'Output file path', './think-report.md')
   .option('--days <number>', 'Consider branches active within N days', '30')
   .option('--github-token <token>', 'GitHub personal access token')
-  .option('--anthropic-key <key>', 'Anthropic API key')
+  .option('--provider <provider>', 'LLM provider: anthropic or openai', 'anthropic')
+  .option('--api-key <key>', 'API key for the selected LLM provider')
+  .option('--anthropic-key <key>', 'Anthropic API key (deprecated, use --api-key)')
+  .option('--base-url <url>', 'Custom LLM API base URL')
   .option(
     '--anthropic-base-url <url>',
-    'Custom Anthropic API base URL (e.g., http://localhost:4141)'
+    'Custom Anthropic API base URL (deprecated, use --base-url)'
   )
-  .option('--model <model>', 'AI model to use (default: claude-opus-4.6)', 'claude-opus-4.6')
+  .option('--model <model>', 'AI model to use', '')
   .action(async (repo: string, options) => {
     const spinner = ora();
 
@@ -51,9 +54,18 @@ program
 
       // Get API keys and config
       let githubToken = options.githubToken || process.env.GITHUB_TOKEN;
-      const anthropicKey = options.anthropicKey || process.env.ANTHROPIC_API_KEY;
-      const anthropicBaseUrl = options.anthropicBaseUrl || process.env.ANTHROPIC_BASE_URL;
-      const model = options.model;
+      const providerName: 'anthropic' | 'openai' =
+        options.provider === 'openai' ? 'openai' : 'anthropic';
+
+      // Resolve API key: --api-key > --anthropic-key > env vars based on provider
+      const apiKey =
+        options.apiKey ||
+        options.anthropicKey ||
+        (providerName === 'openai' ? process.env.OPENAI_API_KEY : process.env.ANTHROPIC_API_KEY) ||
+        process.env.ANTHROPIC_API_KEY;
+
+      const baseUrl = options.baseUrl || options.anthropicBaseUrl || process.env.ANTHROPIC_BASE_URL;
+      const model = options.model || undefined;
 
       // Interactive GitHub authentication if no token provided
       if (!githubToken) {
@@ -61,29 +73,30 @@ program
         githubToken = await auth.getToken();
       }
 
-      if (!anthropicKey) {
-        console.error(
-          chalk.red(
-            '❌ Anthropic API key required. Set ANTHROPIC_API_KEY env var or use --anthropic-key'
-          )
-        );
+      if (!apiKey) {
+        const envVar = providerName === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY';
+        console.error(chalk.red(`❌ API key required. Set ${envVar} env var or use --api-key`));
         process.exit(1);
       }
 
       // Configure analyzer
       const analysisConfig: AnalysisConfig = {
         githubToken,
-        anthropicApiKey: anthropicKey,
-        anthropicBaseUrl,
+        provider: providerName,
+        apiKey,
+        baseUrl,
         model,
         activeDaysThreshold: parseInt(options.days),
       };
 
       console.log(chalk.bold.cyan('\n🧠 Show Me Your Think\n'));
       console.log(`Repository: ${chalk.bold(repo)}`);
-      console.log(`Model: ${chalk.bold(model)}`);
-      if (anthropicBaseUrl) {
-        console.log(`API Endpoint: ${chalk.bold(anthropicBaseUrl)}`);
+      console.log(`Provider: ${chalk.bold(providerName)}`);
+      if (model) {
+        console.log(`Model: ${chalk.bold(model)}`);
+      }
+      if (baseUrl) {
+        console.log(`API Endpoint: ${chalk.bold(baseUrl)}`);
       }
       console.log(`Output: ${chalk.bold(options.output)}\n`);
 

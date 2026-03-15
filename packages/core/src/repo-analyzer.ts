@@ -1,5 +1,6 @@
 import { GitHubFetcher } from './fetcher.js';
 import { AIAnalyzer } from './analyzer.js';
+import { createProvider } from './providers/index.js';
 import type { AnalysisConfig, RepoAnalysis, Feature, Branch, ProgressCallback } from './types.js';
 
 export class RepoAnalyzer {
@@ -10,10 +11,7 @@ export class RepoAnalyzer {
   constructor(config: AnalysisConfig) {
     this.config = config;
     this.fetcher = new GitHubFetcher(config.githubToken);
-    this.analyzer = new AIAnalyzer(config.anthropicApiKey, {
-      baseUrl: config.anthropicBaseUrl,
-      model: config.model,
-    });
+    this.analyzer = new AIAnalyzer(createProvider(config));
   }
 
   /**
