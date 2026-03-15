@@ -97,7 +97,6 @@ export interface RepoAnalysis {
  * Implementations wrap a specific LLM SDK (Anthropic, OpenAI, etc.).
  */
 export interface LLMProvider {
-  // eslint-disable-next-line no-unused-vars
   complete(prompt: string, maxTokens: number): Promise<string>;
 }
 
@@ -130,12 +129,12 @@ export interface AnalysisConfig {
   activeDaysThreshold: number;
 
   // Which branches to analyze (default: all except main/master)
-  // eslint-disable-next-line no-unused-vars
+
   branchFilter?: (branch: Branch) => boolean;
 }
 
 /**
  * Progress callback for long-running analysis
  */
-// eslint-disable-next-line no-unused-vars
+
 export type ProgressCallback = (current: number, total: number, branchName: string) => void;

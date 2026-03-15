@@ -1,27 +1,30 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
+import { useState } from 'react';
 
 interface AnalysisFormProps {
-  onAnalyze: (repo: string, days: number) => void
-  loading: boolean
+  onAnalyze: (repo: string, days: number) => void;
+  loading: boolean;
 }
 
 export function AnalysisForm({ onAnalyze, loading }: AnalysisFormProps) {
-  const [repo, setRepo] = useState('')
-  const [days, setDays] = useState(30)
+  const [repo, setRepo] = useState('');
+  const [days, setDays] = useState(30);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (repo.trim()) {
-      onAnalyze(repo.trim(), days)
+      onAnalyze(repo.trim(), days);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label htmlFor="repo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label
+          htmlFor="repo"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
           GitHub Repository
         </label>
         <input
@@ -40,7 +43,10 @@ export function AnalysisForm({ onAnalyze, loading }: AnalysisFormProps) {
       </div>
 
       <div>
-        <label htmlFor="days" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label
+          htmlFor="days"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
           活跃天数阈值
         </label>
         <input
@@ -76,5 +82,5 @@ export function AnalysisForm({ onAnalyze, loading }: AnalysisFormProps) {
         )}
       </button>
     </form>
-  )
+  );
 }
