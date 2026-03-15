@@ -4,17 +4,35 @@ import type { Branch, CommitInfo, PullRequest } from './types.js';
 /** Simple concurrency limiter — runs at most `limit` promises at a time */
 async function pLimit<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
   const results: T[] = new Array(tasks.length);
+  const errors: { index: number; error: unknown }[] = [];
   let index = 0;
 
   async function worker() {
     while (index < tasks.length) {
       const i = index++;
-      results[i] = await tasks[i]();
+      try {
+        results[i] = await tasks[i]();
+      } catch (error: unknown) {
+        errors.push({ index: i, error });
+      }
     }
   }
 
   const workers = Array.from({ length: Math.min(limit, tasks.length) }, () => worker());
   await Promise.all(workers);
+
+  if (errors.length > 0) {
+    // Sort by task index so the first failure is deterministic
+    errors.sort((a, b) => a.index - b.index);
+    if (errors.length === 1) {
+      throw errors[0].error;
+    }
+    throw new AggregateError(
+      errors.map((e) => e.error),
+      `pLimit: ${errors.length} of ${tasks.length} tasks failed`
+    );
+  }
+
   return results;
 }
 
