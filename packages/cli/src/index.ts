@@ -79,6 +79,15 @@ program
         process.exit(1);
       }
 
+      // Validate --days option
+      const days = parseInt(options.days, 10);
+      if (Number.isNaN(days) || days <= 0) {
+        console.error(
+          chalk.red(`❌ Invalid --days value: "${options.days}". Must be a positive integer.`)
+        );
+        process.exit(1);
+      }
+
       // Configure analyzer
       const analysisConfig: AnalysisConfig = {
         githubToken,
@@ -86,7 +95,7 @@ program
         apiKey,
         baseUrl,
         model,
-        activeDaysThreshold: parseInt(options.days),
+        activeDaysThreshold: days,
       };
 
       console.log(chalk.bold.cyan('\n🧠 Show Me Your Think\n'));
