@@ -87,6 +87,26 @@ export class GitHubFetcher {
   }
 
   /**
+   * Detect the default branch of a repository (e.g. 'main', 'master', etc.)
+   * Uses the GitHub API repos.get which returns `default_branch`.
+   */
+  async getDefaultBranch(owner: string, repo: string): Promise<string> {
+    try {
+      const { data } = await withRateLimitRetry(
+        () => this.octokit.repos.get({ owner, repo }),
+        `getDefaultBranch(${owner}/${repo})`
+      );
+      return data.default_branch;
+    } catch (error) {
+      console.warn(
+        `Failed to detect default branch for ${owner}/${repo}, falling back to 'main':`,
+        error
+      );
+      return 'main';
+    }
+  }
+
+  /**
    * Fetch all branches for a repository
    */
   async fetchBranches(
