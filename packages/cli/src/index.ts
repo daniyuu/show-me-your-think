@@ -33,7 +33,10 @@ program
   .option('--days <number>', 'Consider branches active within N days', '30')
   .option('--github-token <token>', 'GitHub personal access token')
   .option('--anthropic-key <key>', 'Anthropic API key')
-  .option('--anthropic-base-url <url>', 'Custom Anthropic API base URL (e.g., http://localhost:4141)')
+  .option(
+    '--anthropic-base-url <url>',
+    'Custom Anthropic API base URL (e.g., http://localhost:4141)'
+  )
   .option('--model <model>', 'AI model to use (default: claude-opus-4.6)', 'claude-opus-4.6')
   .action(async (repo: string, options) => {
     const spinner = ora();
@@ -60,18 +63,27 @@ program
 
       if (!anthropicKey) {
         console.error(
-          chalk.red('❌ Anthropic API key required. Set ANTHROPIC_API_KEY env var or use --anthropic-key')
+          chalk.red(
+            '❌ Anthropic API key required. Set ANTHROPIC_API_KEY env var or use --anthropic-key'
+          )
         );
         process.exit(1);
       }
 
-      // Configure analyzer
+      // Configure analyzer with progress callback
       const analysisConfig: AnalysisConfig = {
         githubToken,
         anthropicApiKey: anthropicKey,
         anthropicBaseUrl,
         model,
         activeDaysThreshold: parseInt(options.days),
+        onProgress: (current: number, total: number, branchName: string) => {
+          const filled = Math.round((current / total) * 20);
+          const empty = 20 - filled;
+          const bar = '█'.repeat(filled) + '░'.repeat(empty);
+          const pct = Math.round((current / total) * 100);
+          spinner.text = `Analyzing features [${bar}] ${current}/${total} (${pct}%) — ${branchName}`;
+        },
       };
 
       console.log(chalk.bold.cyan('\n🧠 Show Me Your Think\n'));
@@ -83,8 +95,12 @@ program
       console.log(`Output: ${chalk.bold(options.output)}\n`);
 
       // Run analysis
+      spinner.start('Analyzing features...');
       const analyzer = new RepoAnalyzer(analysisConfig);
       const analysis = await analyzer.analyze(owner, repoName);
+      spinner.succeed(
+        chalk.green(`Analyzed ${analysis.summary.totalActiveBranches} active branches`)
+      );
 
       // Generate report
       spinner.start('Generating markdown report...');
@@ -118,7 +134,7 @@ program
     console.log(chalk.yellow('GITHUB_TOKEN'));
     console.log('  Get from: https://github.com/settings/tokens');
     console.log('  Scopes needed: repo (for private repos) or public_repo');
-    console.log('  Or run without it - you\'ll be prompted to login interactively\n');
+    console.log("  Or run without it - you'll be prompted to login interactively\n");
     console.log(chalk.yellow('ANTHROPIC_API_KEY'));
     console.log('  Get from: https://console.anthropic.com/\n');
     console.log('You can also pass these as CLI options:');

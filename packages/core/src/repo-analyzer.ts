@@ -1,11 +1,6 @@
 import { GitHubFetcher } from './fetcher.js';
 import { AIAnalyzer } from './analyzer.js';
-import type {
-  AnalysisConfig,
-  RepoAnalysis,
-  Feature,
-  Branch,
-} from './types.js';
+import type { AnalysisConfig, RepoAnalysis, Feature, Branch } from './types.js';
 
 export class RepoAnalyzer {
   private fetcher: GitHubFetcher;
@@ -29,11 +24,7 @@ export class RepoAnalyzer {
 
     // 1. Fetch all branches
     console.log('📊 Fetching branches...');
-    const branches = await this.fetcher.fetchBranches(
-      owner,
-      repo,
-      this.config.activeDaysThreshold
-    );
+    const branches = await this.fetcher.fetchBranches(owner, repo, this.config.activeDaysThreshold);
 
     // Filter out main/master and apply custom filter
     const activeBranches = branches.filter((branch) => {
@@ -50,9 +41,18 @@ export class RepoAnalyzer {
     // 2. Analyze each branch
     console.log('🤖 Analyzing features with AI...');
     const features: Feature[] = [];
+    const total = activeBranches.length;
 
-    for (const branch of activeBranches) {
-      console.log(`   Analyzing: ${branch.name}`);
+    for (let i = 0; i < activeBranches.length; i++) {
+      const branch = activeBranches[i];
+      const current = i + 1;
+
+      if (this.config.onProgress) {
+        this.config.onProgress(current, total, branch.name);
+      } else {
+        console.log(`   Analyzing: ${branch.name}`);
+      }
+
       const feature = await this.analyzeFeature(owner, repo, branch);
       if (feature) {
         features.push(feature);
@@ -98,11 +98,7 @@ export class RepoAnalyzer {
   ): Promise<Feature | null> {
     try {
       // Fetch commits
-      const commits = await this.fetcher.fetchCommits(
-        owner,
-        repo,
-        branch.name
-      );
+      const commits = await this.fetcher.fetchCommits(owner, repo, branch.name);
 
       if (commits.length === 0) {
         console.log(`   ⚠️  No commits found for ${branch.name}, skipping`);
@@ -196,9 +192,7 @@ export class RepoAnalyzer {
       'that',
     ]);
 
-    return words
-      .filter((w) => w.length > 3 && !stopWords.has(w))
-      .slice(0, 3);
+    return words.filter((w) => w.length > 3 && !stopWords.has(w)).slice(0, 3);
   }
 
   private findPotentialConflicts(features: Feature[]): string[] {

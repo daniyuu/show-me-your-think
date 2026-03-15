@@ -112,5 +112,10 @@ export interface AnalysisConfig {
   activeDaysThreshold: number;
 
   // Which branches to analyze (default: all except main/master)
+  // eslint-disable-next-line no-unused-vars
   branchFilter?: (branch: Branch) => boolean;
+
+  // Optional progress callback: called for each branch during analysis
+  // eslint-disable-next-line no-unused-vars
+  onProgress?: (current: number, total: number, branchName: string) => void;
 }
