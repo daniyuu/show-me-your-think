@@ -46,6 +46,7 @@ export class GitHubAuth {
     }
 
     // Get CLIENT_ID at runtime
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const CLIENT_ID = process.env.GITHUB_OAUTH_CLIENT_ID!;
 
     console.log(chalk.cyan('\n🔐 GitHub Authentication\n'));

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { RepoAnalyzer } from '../repo-analyzer.js';
 
 // Access private methods via any-cast
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function makeRepoAnalyzer(): any {
   return new RepoAnalyzer({
     githubToken: 'fake',

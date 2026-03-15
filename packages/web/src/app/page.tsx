@@ -7,6 +7,7 @@ import { isAuthenticated, getUser, clearToken, authHeaders } from '@/lib/auth';
 import type { UserInfo } from '@/lib/auth';
 
 export default function Home() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);

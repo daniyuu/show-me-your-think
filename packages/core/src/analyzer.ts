@@ -224,7 +224,10 @@ Return ONLY the JSON array, no other text.`;
       const json = jsonMatch ? jsonMatch[0] : cleanResponse;
 
       const relationships = JSON.parse(json);
-      const map = new Map<string, Array<any>>();
+      const map = new Map<
+        string,
+        Array<{ featureId: string; relationship: string; description: string }>
+      >();
 
       for (const rel of relationships) {
         const fromId = features[rel.from]?.id;
@@ -240,7 +243,8 @@ Return ONLY the JSON array, no other text.`;
           map.set(fromId, []);
         }
 
-        map.get(fromId)!.push({
+        const entries = map.get(fromId);
+        entries?.push({
           featureId: toId,
           relationship: relType,
           description: rel.description || 'No description provided',

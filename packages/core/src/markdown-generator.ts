@@ -103,7 +103,7 @@ ${commits.map((c) => `- \`${c.sha.substring(0, 7)}\` ${c.message} (${c.date.toLo
     return `## ⚠️ Potential Conflicts\n\n${conflictList}`;
   }
 
-  private generateFooter(analysis: RepoAnalysis): string {
+  private generateFooter(_analysis: RepoAnalysis): string {
     return `## 📌 Notes
 
 - Analysis based on branches active within the last 30 days
