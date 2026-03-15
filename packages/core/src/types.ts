@@ -93,19 +93,37 @@ export interface RepoAnalysis {
 }
 
 /**
+ * Abstract LLM provider interface.
+ * Implementations wrap a specific LLM SDK (Anthropic, OpenAI, etc.).
+ */
+export interface LLMProvider {
+  // eslint-disable-next-line no-unused-vars
+  complete(prompt: string, maxTokens: number): Promise<string>;
+}
+
+/**
  * Configuration for analysis
  */
 export interface AnalysisConfig {
   // GitHub token for API access (required)
   githubToken: string;
 
-  // Anthropic API key
-  anthropicApiKey: string;
+  // LLM provider to use (default: 'anthropic')
+  provider?: 'anthropic' | 'openai';
 
-  // Optional: Custom base URL for Anthropic API (e.g., local proxy)
+  // API key for the selected provider
+  apiKey?: string;
+
+  // Custom base URL for the LLM API
+  baseUrl?: string;
+
+  /** @deprecated Use `apiKey` instead */
+  anthropicApiKey?: string;
+
+  /** @deprecated Use `baseUrl` instead */
   anthropicBaseUrl?: string;
 
-  // Model to use for analysis (default: claude-opus-4.6)
+  // Model to use for analysis (default depends on provider)
   model?: string;
 
   // How many days back to consider "active"

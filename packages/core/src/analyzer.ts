@@ -1,21 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
-import type { CommitInfo, PullRequest, FeatureIntent } from './types.js';
+import type { CommitInfo, PullRequest, FeatureIntent, LLMProvider } from './types.js';
 
 export class AIAnalyzer {
-  private client: Anthropic;
-  private model: string;
+  private provider: LLMProvider;
 
-  constructor(apiKey: string, options?: { baseUrl?: string; model?: string }) {
-    const clientConfig: any = { apiKey };
-
-    // Support custom base URL (e.g., localhost proxy)
-    if (options?.baseUrl) {
-      clientConfig.baseURL = options.baseUrl;
-      console.log(`🔧 Using custom API endpoint: ${options.baseUrl}`);
-    }
-
-    this.client = new Anthropic(clientConfig);
-    this.model = options?.model || 'claude-opus-4.6';
+  constructor(provider: LLMProvider) {
+    this.provider = provider;
   }
 
   /**
@@ -31,23 +20,9 @@ export class AIAnalyzer {
 
     const prompt = this.buildAnalysisPrompt(branchName, commits, pr, codeDiff);
 
-    const response = await this.client.messages.create({
-      model: this.model,
-      max_tokens: 2000,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    const response = await this.provider.complete(prompt, 2000);
 
-    const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type from Claude');
-    }
-
-    return this.parseIntentResponse(content.text);
+    return this.parseIntentResponse(response);
   }
 
   /**
@@ -76,23 +51,9 @@ export class AIAnalyzer {
 
     const prompt = this.buildRelationshipPrompt(features);
 
-    const response = await this.client.messages.create({
-      model: this.model,
-      max_tokens: 3000,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    const response = await this.provider.complete(prompt, 3000);
 
-    const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type from Claude');
-    }
-
-    return this.parseRelationshipResponse(content.text, features);
+    return this.parseRelationshipResponse(response, features);
   }
 
   private buildAnalysisPrompt(

@@ -17,7 +17,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
-    "@octokit/rest": "^21.0.2"
+    "@octokit/rest": "^21.0.2",
+    "openai": "^6.29.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.5",
