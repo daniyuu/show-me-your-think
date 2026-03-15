@@ -14,7 +14,9 @@
     "lint": "eslint packages/**/*.{ts,tsx} --max-warnings 0",
     "lint:fix": "eslint packages/**/*.{ts,tsx} --fix",
     "format": "prettier --write \"packages/**/*.{ts,tsx,json,md}\"",
-    "format:check": "prettier --check \"packages/**/*.{ts,tsx,json,md}\""
+    "format:check": "prettier --check \"packages/**/*.{ts,tsx,json,md}\"",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "github",
@@ -38,7 +40,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.3.2",
     "prettier": "^3.8.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
