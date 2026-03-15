@@ -107,17 +107,52 @@ export class GitHubFetcher {
   }
 
   /**
-   * Fetch all branches for a repository
+   * Fetch all branches for a repository (with pagination)
    */
   async fetchBranches(
     owner: string,
     repo: string,
     activeDaysThreshold: number = 30
   ): Promise<Branch[]> {
-    const { data: branches } = await withRateLimitRetry(
-      () => this.octokit.repos.listBranches({ owner, repo, per_page: 100 }),
-      `listBranches(${owner}/${repo})`
-    );
+    const branches: Awaited<ReturnType<typeof this.octokit.repos.listBranches>>['data'] = [];
+    let page = 1;
+    const perPage = 100;
+
+    // Paginate through all branches
+    while (true) {
+      const { data: pageBranches } = await withRateLimitRetry(
+        () =>
+          this.octokit.repos.listBranches({
+            owner,
+            repo,
+            per_page: perPage,
+            page,
+          }),
+        `listBranches(${owner}/${repo}, page=${page})`
+      );
+
+      branches.push(...pageBranches);
+
+      if (pageBranches.length < perPage) {
+        break;
+      }
+
+      // Warn that results exceeded a single page (likely many branches)
+      if (page === 1) {
+        console.warn(
+          `⚠️  Repository ${owner}/${repo} has more than ${perPage} branches. ` +
+            `Paginating to fetch all branches...`
+        );
+      }
+
+      page++;
+    }
+
+    if (branches.length >= perPage) {
+      console.warn(
+        `ℹ️  Fetched ${branches.length} total branches for ${owner}/${repo} across ${page} page(s).`
+      );
+    }
 
     const now = new Date();
     const threshold = activeDaysThreshold * 24 * 60 * 60 * 1000;
