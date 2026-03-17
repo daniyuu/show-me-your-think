@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { AnalysisForm } from '@/components/AnalysisForm';
 import { AnalysisResult } from '@/components/AnalysisResult';
+import { LandingPage } from '@/components/LandingPage';
 import { isAuthenticated, getUser, clearToken, authHeaders } from '@/lib/auth';
 import type { UserInfo } from '@/lib/auth';
 
@@ -10,7 +11,7 @@ export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<UserInfo | null>(null);
 
   useEffect(() => {
@@ -119,30 +120,38 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Analysis Form */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
-            <AnalysisForm onAnalyze={handleAnalyze} loading={loading} />
+        {authenticated === null ? (
+          <div className="flex justify-center items-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
+        ) : authenticated ? (
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* Analysis Form */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
+              <AnalysisForm onAnalyze={handleAnalyze} loading={loading} />
+            </div>
 
-          {/* Loading State */}
-          {loading && (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 border border-gray-100 dark:border-gray-700">
-              <div className="flex flex-col items-center justify-center space-y-4">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
-                <p className="text-gray-600 dark:text-gray-400 text-lg">正在分析中，请稍候...</p>
-                <p className="text-sm text-gray-500 dark:text-gray-500">这可能需要几分钟时间</p>
+            {/* Loading State */}
+            {loading && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 border border-gray-100 dark:border-gray-700">
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg">正在分析中，请稍候...</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">这可能需要几分钟时间</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Result */}
-          {result && !loading && (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-              <AnalysisResult result={result} />
-            </div>
-          )}
-        </div>
+            {/* Result */}
+            {result && !loading && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <AnalysisResult result={result} />
+              </div>
+            )}
+          </div>
+        ) : (
+          <LandingPage />
+        )}
       </main>
 
       {/* Footer */}
